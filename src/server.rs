@@ -14,15 +14,15 @@ pub fn get_tcp_listener() -> std::io::Result<TcpListener> {
     TcpListener::bind(&addr)
 }
 
-pub fn run(listener: TcpListener) -> std::io::Result<Server> {
-    println!("Server running at: {:?}", listener.local_addr()?);
+// pub fn run(listener: TcpListener) -> std::io::Result<Server> {
+//     println!("Server running at: {:?}", listener.local_addr()?);
 
-    let server = HttpServer::new(|| {
-        App::new()
-            .service(web::scope("/api").configure(routes::user::configure))
-    })
-    .listen(listener)?
-    .run();
+//     let server = HttpServer::new(|| {
+//         App::new()
+//             .service(web::scope("/api").configure(routes::user::configure))
+//     })
+//     .listen(listener)?
+//     .run();
 
-    Ok(server)
-}
+//     Ok(server)
+// }
