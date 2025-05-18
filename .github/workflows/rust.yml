@@ -56,7 +56,7 @@ jobs:
           components: clippy
           
       - name: Clippy check
-        uses: actions-rs/clippy-check@v1
+        uses: actions-rs/cargo@v1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          args: -- -D warnings
+          command: clippy
+          args: -- -D warnings -v
