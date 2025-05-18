@@ -1,7 +1,4 @@
-use actix_web::{App, HttpServer, web, dev::Server};
 use std::net::TcpListener;
-
-use crate::routes;
 
 pub fn get_tcp_listener() -> std::io::Result<TcpListener> {
     let host = std::env::var("HOST").unwrap_or_else(|_| "127.0.0.1".to_string());
