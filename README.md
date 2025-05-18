@@ -1,0 +1,1 @@
+![Rust CI](https://github.com/{username}/{repo-name}/workflows/Rust%20CI/badge.svg)
