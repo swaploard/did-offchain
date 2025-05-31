@@ -2,6 +2,9 @@ pub mod models;
 pub mod services;
 mod server;
 mod routes;
+mod utils;
+
+use utils::logger::init_logger;
 use actix_web::{App, HttpServer};
 use utoipa_swagger_ui::SwaggerUi;
 
@@ -11,6 +14,9 @@ async fn main() -> std::io::Result<()> {
     if let Err(err) = dotenv::dotenv() {
         eprintln!("Warning: failed to load .env file: {}", err);
     }
+    
+    init_logger();
+    tracing::info!("🚀 Logger initialized");
 
     let listener = match server::get_tcp_listener() {
         Ok(l) => l,
@@ -48,4 +54,6 @@ async fn main() -> std::io::Result<()> {
     .listen(listener)?
     .run()
     .await
+
+    
 }
