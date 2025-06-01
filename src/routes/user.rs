@@ -1,7 +1,7 @@
-use actix_web::{web, HttpResponse, Responder};
+use actix_web::{web};
 use utoipa::{OpenApi};
 use crate::models::user::User;
-use crate::services::user_service;
+use crate::handlers::user_handler;
 
 #[utoipa::path(
     get,
@@ -10,18 +10,14 @@ use crate::services::user_service;
         (status = 200, description = "List users", body = [User])
     )
 )]
-pub async fn get_users() -> impl Responder {
-    let users = user_service::fetch_users().await;
-    HttpResponse::Ok().json(users)
-}
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
-    cfg.route("/user", web::get().to(get_users));
+    cfg.route("/user", web::get().to(user_handler::get_users));
 }
 
 #[derive(OpenApi)]
 #[openapi(
-    paths(get_users),
+    paths(user_handler::get_users),
     components(schemas(User)),
     tags((name = "User", description = "User-related endpoints"))
 )]

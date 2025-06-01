@@ -22,6 +22,7 @@ utoipa-swagger-ui = { version = "9.0.2", features = ["actix-web"] }
 sqlx = { version = "0.8.6", features = ["runtime-tokio-native-tls", "postgres", "macros", "migrate"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
+tracing-actix-web = "0.7"
 
 [dev-dependencies]
 cargo-watch = "8.1.1"

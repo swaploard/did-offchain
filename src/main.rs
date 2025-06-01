@@ -1,11 +1,13 @@
+mod handlers;
 pub mod models;
-pub mod services;
-mod server;
 mod routes;
+mod server;
+pub mod services;
 mod utils;
 
-use utils::logger::init_logger;
 use actix_web::{App, HttpServer};
+use tracing_actix_web::TracingLogger;
+use utils::logger::init_logger;
 use utoipa_swagger_ui::SwaggerUi;
 
 #[actix_web::main]
@@ -14,7 +16,7 @@ async fn main() -> std::io::Result<()> {
     if let Err(err) = dotenv::dotenv() {
         eprintln!("Warning: failed to load .env file: {}", err);
     }
-    
+
     init_logger();
     tracing::info!("🚀 Logger initialized");
 
@@ -40,13 +42,13 @@ async fn main() -> std::io::Result<()> {
 
     // Launch server
     HttpServer::new(move || {
-        let mut app = App::new().configure(routes::configure);
+        let mut app = App::new()
+            .wrap(TracingLogger::default())
+            .configure(routes::configure);
 
         if let Some(ref doc) = openapi {
-            app = app.service(
-                SwaggerUi::new("/swagger-ui/{_:.*}")
-                    .url("/openapi.json", doc.clone()),
-            );
+            app =
+                app.service(SwaggerUi::new("/swagger-ui/{_:.*}").url("/openapi.json", doc.clone()));
         }
 
         app
@@ -54,6 +56,4 @@ async fn main() -> std::io::Result<()> {
     .listen(listener)?
     .run()
     .await
-
-    
 }
