@@ -5,50 +5,52 @@ mod server;
 pub mod services;
 mod utils;
 
-use actix_web::{App, HttpServer};
+use actix_web::{App, HttpServer, web};
+use sqlx::postgres::PgPoolOptions;
 use tracing_actix_web::TracingLogger;
 use utils::logger::init_logger;
 use utoipa_swagger_ui::SwaggerUi;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    // Load .env (optional but recommended)
-    if let Err(err) = dotenv::dotenv() {
-        eprintln!("Warning: failed to load .env file: {}", err);
-    }
-
+    dotenv::dotenv().ok();
     init_logger();
     tracing::info!("🚀 Logger initialized");
 
-    let listener = match server::get_tcp_listener() {
-        Ok(l) => l,
-        Err(e) => {
-            eprintln!("❌ Failed to bind to address: {}", e);
-            std::process::exit(1);
-        }
-    };
+    // Setup database
+    let database_url = std::env::var("DATABASE_URL")
+        .expect("DATABASE_URL must be set");
+    let pool = PgPoolOptions::new()
+        .max_connections(5)
+        .connect(&database_url)
+        .await
+        .expect("❌ Failed to connect to PostgreSQL");
 
-    // Read environment
+    tracing::info!("✅ Connected to PostgreSQL database");
+
+    // Setup listener
+    let listener = server::get_tcp_listener()
+        .expect("❌ Failed to bind TCP listener");
+
+    // Swagger only for dev
     let is_dev = std::env::var("APP_ENV")
         .map(|val| val == "development")
         .unwrap_or(false);
-
-    // Build OpenAPI only if needed
     let openapi = if is_dev {
         Some(routes::build_openapi())
     } else {
         None
     };
 
-    // Launch server
+    // Start HTTP server
     HttpServer::new(move || {
         let mut app = App::new()
             .wrap(TracingLogger::default())
+            .app_data(web::Data::new(pool.clone())) // ✅ inject PgPool
             .configure(routes::configure);
 
         if let Some(ref doc) = openapi {
-            app =
-                app.service(SwaggerUi::new("/swagger-ui/{_:.*}").url("/openapi.json", doc.clone()));
+            app = app.service(SwaggerUi::new("/swagger-ui/{_:.*}").url("/openapi.json", doc.clone()));
         }
 
         app

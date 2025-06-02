@@ -20,7 +20,7 @@ tokio = { version = "1.45.1", features = ["full"] }
 uuid = { version = "1.7", features = ["serde", "v4"] }
 utoipa = { version = "5.3.1", features = ["chrono", "uuid"] }
 utoipa-swagger-ui = { version = "9.0.2", features = ["actix-web"] }
-sqlx = { version = "0.8.6", features = ["runtime-tokio-native-tls", "postgres", "macros", "migrate"] }
+sqlx = { version = "0.8.6", features = ["runtime-tokio-native-tls", "postgres", "macros", "migrate", "chrono", "uuid"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
 tracing-actix-web = "0.7"

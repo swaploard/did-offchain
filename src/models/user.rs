@@ -3,7 +3,7 @@ use chrono::{DateTime, Utc};
 use uuid::Uuid;
 use validator::Validate;
 
-#[derive(Serialize, Deserialize, Debug, Clone, utoipa::ToSchema, Validate)]
+#[derive(Serialize, Deserialize, Debug, Clone, utoipa::ToSchema, Validate, sqlx::FromRow)]
 pub struct User {
     pub id: Uuid,
     #[validate(length(min = 3))]

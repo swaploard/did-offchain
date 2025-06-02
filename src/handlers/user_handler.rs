@@ -1,6 +1,7 @@
 use actix_web::{get, post, web, HttpResponse, Responder};
 use crate::models::user::{User, CreateUserRequest};
 use crate::services::user_service;
+use sqlx::PgPool;
 
 #[utoipa::path(
     get,
@@ -25,10 +26,19 @@ pub async fn get_users() -> impl Responder {
 )]
 
 #[post("/users")]
-pub async fn create_user(user: web::Json<CreateUserRequest>) -> impl Responder {
-    let created = user_service::create_user(user.into_inner()).await;
-    HttpResponse::Created().json(created)
+pub async fn create_user(
+    pool: web::Data<PgPool>,
+    user: web::Json<CreateUserRequest>
+) -> impl Responder {
+    match user_service::create_user(pool.get_ref(), user.into_inner()).await {
+        Ok(user) => HttpResponse::Created().json(user),
+        Err(e) => {
+            eprintln!("❌ Failed to create user: {:?}", e);
+            HttpResponse::InternalServerError().body("Failed to create user")
+        }
+    }
 }
+
 
 // #[utoipa::path(
 //     put,
