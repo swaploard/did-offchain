@@ -1,12 +1,16 @@
 use serde::{Serialize, Deserialize};
 use chrono::{DateTime, Utc};
 use uuid::Uuid;
+use validator::Validate;
 
-#[derive(Serialize, Deserialize, Debug, Clone, utoipa::ToSchema)]
+#[derive(Serialize, Deserialize, Debug, Clone, utoipa::ToSchema, Validate)]
 pub struct User {
     pub id: Uuid,
+    #[validate(length(min = 3))]
     pub username: String,
+    #[validate(email)]
     pub email: String,
+    #[validate(length(min = 8, message = "Password must be at least 8 characters"))]
     pub password_hash: String,
     pub display_name: Option<String>,
     pub avatar_url: Option<String>,

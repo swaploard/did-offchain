@@ -12,7 +12,9 @@ use crate::handlers::user_handler;
 )]
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
-    cfg.route("/user", web::get().to(user_handler::get_users));
+    cfg
+    .service(user_handler::get_users)
+    .service(user_handler::create_user);
 }
 
 #[derive(OpenApi)]

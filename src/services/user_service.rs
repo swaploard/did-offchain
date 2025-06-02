@@ -32,3 +32,17 @@ pub async fn fetch_users() -> Vec<User> {
         },
     ]
 }
+
+
+pub async fn create_user(user: User) -> User { 
+    let now = Utc::now();
+
+    User {
+        id: Uuid::new_v4(),
+        created_at: now,
+        updated_at: now,
+        last_seen: now,
+        is_online: false,
+        ..user 
+    }
+}
