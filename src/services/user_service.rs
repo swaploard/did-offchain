@@ -1,4 +1,4 @@
-use crate::models::user::User;
+use crate::models::user::{User, CreateUserRequest};
 use uuid::Uuid;
 use chrono::Utc;
 
@@ -34,15 +34,19 @@ pub async fn fetch_users() -> Vec<User> {
 }
 
 
-pub async fn create_user(user: User) -> User { 
+pub async fn create_user(user: CreateUserRequest) -> User { 
     let now = Utc::now();
 
     User {
         id: Uuid::new_v4(),
+        username: user.username,
+        email: user.email,
+        password_hash: user.password_hash,
+        display_name: user.display_name,
+        avatar_url: user.avatar_url,
+        is_online: false,
+        last_seen: now,
         created_at: now,
         updated_at: now,
-        last_seen: now,
-        is_online: false,
-        ..user 
     }
 }

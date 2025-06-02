@@ -1,22 +1,31 @@
 use actix_web::{get, post, web, HttpResponse, Responder};
-use crate::models::user::User;
+use crate::models::user::{User, CreateUserRequest};
 use crate::services::user_service;
 
 #[utoipa::path(
     get,
-    path = "/user",
-    request_body = User,
+    path = "/users",
     responses((status = 200, body = [User]))
 )]
 
 #[get("/users")]
 pub async fn get_users() -> impl Responder {
     let users = user_service::fetch_users().await;
+    println!("Fetched users: {:?}", users);
     HttpResponse::Ok().json(users)
 }
 
+#[utoipa::path(
+    post,
+    path = "/users",
+    request_body = CreateUserRequest,
+    responses(
+        (status = 201, description = "User created successfully", body = User)
+    )
+)]
+
 #[post("/users")]
-pub async fn create_user(user: web::Json<User>) -> impl Responder {
+pub async fn create_user(user: web::Json<CreateUserRequest>) -> impl Responder {
     let created = user_service::create_user(user.into_inner()).await;
     HttpResponse::Created().json(created)
 }

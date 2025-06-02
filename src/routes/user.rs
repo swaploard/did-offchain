@@ -19,9 +19,9 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
 
 #[derive(OpenApi)]
 #[openapi(
-    paths(user_handler::get_users),
+    paths(user_handler::get_users, user_handler::create_user),
     components(schemas(User)),
-    tags((name = "User", description = "User-related endpoints"))
+    tags((name = "User", description = "User endpoints"))
 )]
 pub struct UserApiDoc;
 
