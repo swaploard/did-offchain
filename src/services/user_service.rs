@@ -2,36 +2,22 @@ use crate::models::user::{User, CreateUserRequest};
 use uuid::Uuid;
 use chrono::Utc;
 use sqlx::PgPool;
+use std::error::Error;
 
-pub async fn fetch_users() -> Vec<User> {
-    let now = Utc::now();
-    
-    vec![
-        User {
-            id: Uuid::new_v4(),
-            username: "alice".to_string(),
-            email: "alice@example.com".to_string(),
-            password_hash: "hashed_password".to_string(),
-            display_name: Some("Alice A.".to_string()),
-            avatar_url: Some("https://example.com/avatar1.png".to_string()),
-            is_online: true,
-            last_seen: now,
-            created_at: now,
-            updated_at: now,
-        },
-        User {
-            id: Uuid::new_v4(),
-            username: "bob".to_string(),
-            email: "bob@example.com".to_string(),
-            password_hash: "hashed_password".to_string(),
-            display_name: Some("Bob B.".to_string()),
-            avatar_url: Some("https://example.com/avatar2.png".to_string()),
-            is_online: false,
-            last_seen: now,
-            created_at: now,
-            updated_at: now,
-        },
-    ]
+pub async fn fetch_users(
+    pool: &PgPool
+) ->  Result<Vec<User>, Box<dyn Error>> {
+    let users = sqlx::query_as::<_, User>(
+        r#"
+        SELECT *
+        FROM users
+        ORDER BY created_at DESC
+        "#
+    )
+    .fetch_all(pool)
+    .await?;
+
+    Ok(users)
 }
 
 

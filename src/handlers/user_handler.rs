@@ -10,10 +10,14 @@ use sqlx::PgPool;
 )]
 
 #[get("/users")]
-pub async fn get_users() -> impl Responder {
-    let users = user_service::fetch_users().await;
-    println!("Fetched users: {:?}", users);
-    HttpResponse::Ok().json(users)
+pub async fn get_users(pool: web::Data<PgPool>) -> impl Responder {
+    match user_service::fetch_users(&pool).await {
+        Ok(users) => HttpResponse::Ok().json(users),
+        Err(e) => {
+            eprintln!("Error fetching users: {:?}", e);
+            HttpResponse::InternalServerError().body("Failed to fetch users")
+        }
+    }
 }
 
 #[utoipa::path(
