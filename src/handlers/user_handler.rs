@@ -1,46 +1,55 @@
 use actix_web::{get, post, web, HttpResponse, Responder};
 use crate::models::user::{User, CreateUserRequest};
 use crate::services::user_service;
+use crate::errors::user_errors::UserServiceError;
+use crate::utils::auth_guard::AuthGuard;
+use crate::models::user::UserRole;
 use sqlx::PgPool;
 
 #[utoipa::path(
     get,
     path = "/users",
-    responses((status = 200, body = [User]))
+    responses((status = 200, body = [User])),
+    security(("bearer_auth" = []))
 )]
-
 #[get("/users")]
-pub async fn get_users(pool: web::Data<PgPool>) -> impl Responder {
-    match user_service::fetch_users(&pool).await {
-        Ok(users) => HttpResponse::Ok().json(users),
-        Err(e) => {
-            eprintln!("Error fetching users: {:?}", e);
-            HttpResponse::InternalServerError().body("Failed to fetch users")
-        }
-    }
+pub async fn get_users(
+    pool: web::Data<PgPool>,
+    auth: AuthGuard,
+) -> Result<impl Responder, UserServiceError> {
+    auth.require_role(UserRole::Admin)
+        .map_err(|_| UserServiceError::Unauthorized)?;
+
+    let users = user_service::fetch_users(&pool)
+        .await
+        .map_err(|e| UserServiceError::Internal(e.to_string()))?;
+
+    Ok(HttpResponse::Ok().json(users))
 }
+
 
 #[utoipa::path(
     post,
     path = "/users",
     request_body = CreateUserRequest,
-    responses(
-        (status = 201, description = "User created successfully", body = User)
-    )
+    responses((status = 201, description = "User created successfully", body = User)),
+    security(("bearer_auth" = []))
 )]
-
 #[post("/users")]
 pub async fn create_user(
     pool: web::Data<PgPool>,
-    user: web::Json<CreateUserRequest>
-) -> impl Responder {
-    match user_service::create_user(pool.get_ref(), user.into_inner()).await {
-        Ok(user) => HttpResponse::Created().json(user),
-        Err(e) => {
-            eprintln!("❌ Failed to create user: {:?}", e);
-            HttpResponse::InternalServerError().body("Failed to create user")
-        }
-    }
+    auth: AuthGuard, // <-- extract AuthGuard
+    user: web::Json<CreateUserRequest>,
+) -> Result<impl Responder, UserServiceError> {
+    // Optional: restrict to admin only
+    auth.require_role(UserRole::Admin)
+    .map_err(|_| UserServiceError::Unauthorized)?;
+
+    let created_user = user_service::create_user(pool.get_ref(), user.into_inner())
+        .await
+        .map_err(|e| UserServiceError::Internal(e.to_string()))?;
+
+    Ok(HttpResponse::Created().json(created_user))
 }
 
 

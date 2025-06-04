@@ -4,6 +4,8 @@ mod routes;
 mod server;
 pub mod services;
 mod utils;
+pub mod settings;
+mod errors;
 
 use actix_web::{App, HttpServer, web};
 use sqlx::postgres::PgPoolOptions;
