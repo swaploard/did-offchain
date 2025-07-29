@@ -1,9 +1,9 @@
-use actix_web::{get, post, web, HttpResponse, Responder};
-use crate::models::user::{User, CreateUserRequest};
-use crate::services::user_service;
 use crate::errors::user_errors::UserServiceError;
-use crate::utils::auth_guard::AuthGuard;
 use crate::models::user::UserRole;
+use crate::models::user::{CreateUserRequest, User};
+use crate::services::user_service;
+use crate::utils::auth_guard::AuthGuard;
+use actix_web::{get, post, web, HttpResponse, Responder};
 use sqlx::PgPool;
 
 #[utoipa::path(
@@ -27,7 +27,6 @@ pub async fn get_users(
     Ok(HttpResponse::Ok().json(users))
 }
 
-
 #[utoipa::path(
     post,
     path = "/users",
@@ -43,7 +42,7 @@ pub async fn create_user(
 ) -> Result<impl Responder, UserServiceError> {
     // Optional: restrict to admin only
     auth.require_role(UserRole::Admin)
-    .map_err(|_| UserServiceError::Unauthorized)?;
+        .map_err(|_| UserServiceError::Unauthorized)?;
 
     let created_user = user_service::create_user(pool.get_ref(), user.into_inner())
         .await
@@ -51,7 +50,6 @@ pub async fn create_user(
 
     Ok(HttpResponse::Created().json(created_user))
 }
-
 
 // #[utoipa::path(
 //     put,

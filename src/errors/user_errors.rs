@@ -1,7 +1,7 @@
 use actix_web::{http::StatusCode, HttpResponse, ResponseError};
-use validator::ValidationErrors;
 use serde::Serialize;
 use thiserror::Error;
+use validator::ValidationErrors;
 
 #[derive(Debug, Error)]
 pub enum UserServiceError {
@@ -39,9 +39,9 @@ impl ResponseError for UserServiceError {
             UserServiceError::BadCredentials => StatusCode::UNAUTHORIZED,
             UserServiceError::UserExists => StatusCode::CONFLICT,
             UserServiceError::ValidationError(_) => StatusCode::BAD_REQUEST,
-            UserServiceError::DbError(_) | UserServiceError::HashError | UserServiceError::JwtError(_) => {
-                StatusCode::INTERNAL_SERVER_ERROR
-            }
+            UserServiceError::DbError(_)
+            | UserServiceError::HashError
+            | UserServiceError::JwtError(_) => StatusCode::INTERNAL_SERVER_ERROR,
         };
 
         let err_json = ErrorResponse {

@@ -1,6 +1,6 @@
 use crate::errors::user_errors::UserServiceError;
-use crate::models::user::User;
 use crate::models::auth::SignupRequest;
+use crate::models::user::User;
 use crate::utils::password;
 use sqlx::PgPool;
 use uuid::Uuid;
@@ -10,20 +10,19 @@ pub async fn register_user(
     payload: SignupRequest,
 ) -> Result<String, UserServiceError> {
     let role = "User".to_string(); // Default role
-    let existing: Option<(Uuid,)> = sqlx::query_as(
-        "SELECT id FROM users WHERE username = $1 OR email = $2"
-    )
-    .bind(&payload.username)
-    .bind(&payload.email)
-    .fetch_optional(db)
-    .await?;
+    let existing: Option<(Uuid,)> =
+        sqlx::query_as("SELECT id FROM users WHERE username = $1 OR email = $2")
+            .bind(&payload.username)
+            .bind(&payload.email)
+            .fetch_optional(db)
+            .await?;
 
     if existing.is_some() {
         return Err(UserServiceError::UserExists);
     }
 
-    let password_hash = password::hash_password(&payload.password)
-    .map_err(|_e| UserServiceError::HashError)?;
+    let password_hash =
+        password::hash_password(&payload.password).map_err(|_e| UserServiceError::HashError)?;
 
     let rec: User = sqlx::query_as::<_, User>(
         r#"
@@ -47,7 +46,7 @@ pub async fn register_user(
             created_at,
             updated_at,
             role
-        "#
+        "#,
     )
     .bind(&payload.username)
     .bind(&payload.email)
@@ -82,7 +81,7 @@ pub async fn authenticate_user(
             role
         FROM users
         WHERE username = $1
-        "#
+        "#,
     )
     .bind(username)
     .fetch_optional(db)

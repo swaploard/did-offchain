@@ -1,14 +1,8 @@
-use actix_web::{
-    dev::Payload, 
-    error::ErrorUnauthorized, 
-    Error, 
-    FromRequest, 
-    HttpRequest,
-};
-use futures_util::future::{ready, Ready};
 use crate::models::claims::Claims;
-use crate::utils::jwt::decode_token;
 use crate::settings::jwt::JWT_CONFIG;
+use crate::utils::jwt::decode_token;
+use actix_web::{dev::Payload, error::ErrorUnauthorized, Error, FromRequest, HttpRequest};
+use futures_util::future::{ready, Ready};
 
 #[derive(Debug, Clone)]
 pub struct AuthGuard {

@@ -33,7 +33,8 @@ password-hash = "0.5"
 thiserror = "2.0.12"
 once_cell = "1.19"
 futures-util = "0.3"
-
+ssi = { version = "0.12.0", features = ["w3c"]  }
+anyhow = { version = "1.0.98" }
 [dev-dependencies]
 cargo-watch = "8.1.1"
 

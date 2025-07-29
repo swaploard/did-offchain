@@ -1,19 +1,18 @@
-pub mod user;
 pub mod auth;
+pub mod did;
+pub mod user;
 
 use actix_web::web::ServiceConfig;
-use utoipa::openapi::{OpenApi, OpenApiBuilder, ComponentsBuilder, security};
+use utoipa::openapi::{security, ComponentsBuilder, OpenApi, OpenApiBuilder};
 
 pub fn configure(cfg: &mut ServiceConfig) {
     user::configure(cfg);
     auth::configure(cfg);
+    did::configure(cfg);
 }
 
 pub fn build_openapi() -> OpenApi {
-    let mut specs = vec![
-        user::get_openapi(),
-        auth::get_openapi(),
-    ];
+    let mut specs = vec![user::get_openapi(), auth::get_openapi(), did::get_openapi()];
 
     let mut merged = specs.remove(0);
     for spec in specs {
@@ -40,9 +39,10 @@ pub fn build_openapi() -> OpenApi {
 
     let components = components_builder.build();
 
-    let security = Some(vec![
-        security::SecurityRequirement::new("bearer_auth", Vec::<String>::new()),
-    ]);
+    let security = Some(vec![security::SecurityRequirement::new(
+        "bearer_auth",
+        Vec::<String>::new(),
+    )]);
 
     OpenApiBuilder::from(merged)
         .components(Some(components))

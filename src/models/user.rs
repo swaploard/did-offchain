@@ -1,9 +1,9 @@
-use serde::{Serialize, Deserialize};
 use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
+use sqlx::{FromRow, Type};
+use utoipa::ToSchema;
 use uuid::Uuid;
 use validator::Validate;
-use utoipa::ToSchema;
-use sqlx::{Type, FromRow};
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Type, ToSchema)]
 #[sqlx(type_name = "user_role")]
@@ -31,7 +31,6 @@ pub struct User {
     pub updated_at: DateTime<Utc>,
     pub role: UserRole,
 }
-
 
 #[derive(Serialize, Deserialize, Debug, Clone, ToSchema, Validate)]
 pub struct CreateUserRequest {

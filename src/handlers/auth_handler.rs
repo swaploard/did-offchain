@@ -1,13 +1,13 @@
-use actix_web::{post, web, HttpResponse, Responder};
-use crate::models::auth::{SignupRequest, LogoutRequest, TokenResponse, LoginRequest};
-use crate::services::auth_service::{register_user, authenticate_user};
-use crate::settings::jwt::JWT_CONFIG;
-use crate::utils::jwt::{issue_tokens, decode_token};
 use crate::errors::user_errors::UserServiceError;
+use crate::models::auth::{LoginRequest, LogoutRequest, SignupRequest, TokenResponse};
+use crate::models::user::UserRole;
+use crate::services::auth_service::{authenticate_user, register_user};
+use crate::settings::jwt::JWT_CONFIG;
+use crate::utils::jwt::{decode_token, issue_tokens};
+use actix_web::{post, web, HttpResponse, Responder};
 use sqlx::PgPool;
 use utoipa::path;
 use validator::Validate;
-use crate::models::user::UserRole;
 
 #[utoipa::path(
     post,
@@ -25,7 +25,8 @@ pub async fn login(
 ) -> Result<impl Responder, UserServiceError> {
     let data = payload.into_inner();
     let user = authenticate_user(pool.get_ref(), &data.username, &data.password).await?;
-    let (access, refresh) = issue_tokens(&user.id.to_string(), user.role).map_err(UserServiceError::JwtError)?;
+    let (access, refresh) =
+        issue_tokens(&user.id.to_string(), user.role).map_err(UserServiceError::JwtError)?;
 
     Ok(HttpResponse::Ok().json(TokenResponse {
         access_token: access,
@@ -49,8 +50,8 @@ pub async fn signup(
 ) -> Result<impl Responder, UserServiceError> {
     let role = UserRole::User;
     payload
-    .validate()
-    .map_err(|e| UserServiceError::ValidationError(e.to_string()))?;
+        .validate()
+        .map_err(|e| UserServiceError::ValidationError(e.to_string()))?;
     let data = payload.into_inner();
     let user_id = register_user(pool.get_ref(), data).await?;
     let (access, refresh) = issue_tokens(&user_id, role).map_err(UserServiceError::JwtError)?;
@@ -95,9 +96,8 @@ pub async fn refresh_token(body: String) -> impl Responder {
         Ok(token_data) if token_data.claims.token_type == "refresh" => {
             let subject = token_data.claims.sub;
             let role = token_data.claims.role.clone();
-            let (access, refresh) = issue_tokens(&subject, role).unwrap_or_else(|_| {
-                ("".into(), "".into())
-            });
+            let (access, refresh) =
+                issue_tokens(&subject, role).unwrap_or_else(|_| ("".into(), "".into()));
             if access.is_empty() {
                 HttpResponse::InternalServerError().body("Failed to issue new tokens")
             } else {

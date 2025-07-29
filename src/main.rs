@@ -1,13 +1,13 @@
+mod errors;
 mod handlers;
 pub mod models;
 mod routes;
 mod server;
 pub mod services;
-mod utils;
 pub mod settings;
-mod errors;
+mod utils;
 
-use actix_web::{App, HttpServer, web};
+use actix_web::{web, App, HttpServer};
 use sqlx::postgres::PgPoolOptions;
 use tracing_actix_web::TracingLogger;
 use utils::logger::init_logger;
@@ -20,8 +20,7 @@ async fn main() -> std::io::Result<()> {
     tracing::info!("🚀 Logger initialized");
 
     // Setup database
-    let database_url = std::env::var("DATABASE_URL")
-        .expect("DATABASE_URL must be set");
+    let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     let pool = PgPoolOptions::new()
         .max_connections(5)
         .connect(&database_url)
@@ -31,8 +30,7 @@ async fn main() -> std::io::Result<()> {
     tracing::info!("✅ Connected to PostgreSQL database");
 
     // Setup listener
-    let listener = server::get_tcp_listener()
-        .expect("❌ Failed to bind TCP listener");
+    let listener = server::get_tcp_listener().expect("❌ Failed to bind TCP listener");
 
     // Swagger only for dev
     let is_dev = std::env::var("APP_ENV")
@@ -52,7 +50,8 @@ async fn main() -> std::io::Result<()> {
             .configure(routes::configure);
 
         if let Some(ref doc) = openapi {
-            app = app.service(SwaggerUi::new("/swagger-ui/{_:.*}").url("/openapi.json", doc.clone()));
+            app =
+                app.service(SwaggerUi::new("/swagger-ui/{_:.*}").url("/openapi.json", doc.clone()));
         }
 
         app

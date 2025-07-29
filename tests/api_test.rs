@@ -1,14 +1,13 @@
 use actix_web::{test, App};
-use backend_boilerplate::{routes, models::user::User};
+use backend_boilerplate::{models::user::User, routes};
 
 #[actix_web::test]
 async fn test_get_users() {
     // Create test app
     let app = test::init_service(
-        App::new()
-            .service(actix_web::web::scope("/api")
-            .configure(routes::user::configure))
-    ).await;
+        App::new().service(actix_web::web::scope("/api").configure(routes::user::configure)),
+    )
+    .await;
 
     // Create test request
     let req = test::TestRequest::get().uri("/api/user").to_request();

@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
+use sqlx::Type;
 use utoipa::ToSchema;
 use validator::Validate;
-use sqlx::Type;
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Type, ToSchema)]
 #[sqlx(type_name = "user_role")]
 #[sqlx(rename_all = "lowercase")]
