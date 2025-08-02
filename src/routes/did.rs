@@ -13,10 +13,14 @@ use utoipa::OpenApi;
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(did_handler::create_did);
+    cfg.service(did_handler::verify_did_auth);
 }
 
 #[derive(OpenApi)]
-#[openapi(paths(did_handler::create_did), components(schemas(DID)))]
+#[openapi(
+    paths(did_handler::create_did, did_handler::verify_did_auth),
+    components(schemas(DID))
+)]
 pub struct DIDApiDoc;
 
 pub fn get_openapi() -> utoipa::openapi::OpenApi {

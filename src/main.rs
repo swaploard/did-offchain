@@ -7,11 +7,15 @@ pub mod services;
 pub mod settings;
 mod utils;
 
+use actix_cors::Cors;
 use actix_web::{web, App, HttpServer};
+
 use sqlx::postgres::PgPoolOptions;
 use tracing_actix_web::TracingLogger;
 use utils::logger::init_logger;
 use utoipa_swagger_ui::SwaggerUi;
+
+use deadpool_redis::{Config as RedisConfig, Runtime};
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -42,11 +46,25 @@ async fn main() -> std::io::Result<()> {
         None
     };
 
+    let redis_url = std::env::var("REDIS_URL").expect("REDIS_URL must be set");
+    let redis_cfg = RedisConfig::from_url(redis_url);
+    let redis_pool = redis_cfg
+        .create_pool(Some(Runtime::Tokio1))
+        .expect("❌ Failed to create Redis pool");
+
+    tracing::info!("✅ Connected to Redis");
     // Start HTTP server
     HttpServer::new(move || {
+        let cors = Cors::default()
+            .allow_any_origin()
+            .allow_any_method()
+            .allow_any_header()
+            .supports_credentials();
         let mut app = App::new()
+            .wrap(cors)
             .wrap(TracingLogger::default())
-            .app_data(web::Data::new(pool.clone())) // ✅ inject PgPool
+            .app_data(web::Data::new(pool.clone()))
+            .app_data(web::Data::new(redis_pool.clone()))
             .configure(routes::configure);
 
         if let Some(ref doc) = openapi {

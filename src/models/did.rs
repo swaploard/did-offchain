@@ -50,7 +50,6 @@ pub struct DidDocumentRecord {
     pub controller: String,
     pub did: String,
     pub document: serde_json::Value,
-    pub verification_method: serde_json::Value,
     pub metadata: Option<serde_json::Value>,
     pub created_at: DateTime<Utc>,
 }
